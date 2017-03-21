@@ -22,6 +22,11 @@ class MyCar
     puts "You stopped the car."
   end
   
+  def change_color(c)
+    self.color = c
+    puts "Your car is now #{@color}".
+  end
+  
 end
 
 
@@ -29,3 +34,4 @@ car = MyCar.new("1980", "red", "Nissan")
 car.speed_up(30)
 car.brake(20)
 car.stop
+car.change_color("blue")
