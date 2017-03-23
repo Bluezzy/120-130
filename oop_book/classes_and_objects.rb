@@ -137,7 +137,7 @@ class GoodDog
 
 # getter_method
 
-  def name # If we want to access the object's name, 
+  def name     # If we want to access the object's name, 
     @name      # which is stored in the @name instance variable, 
   end          # we have to create a method that will return the name.   
 
@@ -223,28 +223,6 @@ puts sparky.info      # => Sparky weighs 10 lbs and is 12 inches tall.
 
 sparky.change_info('Spartacus', '24 inches', '45 lbs')
 puts sparky.info      # => Spartacus weighs 45 lbs and is 24 inches tall.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
