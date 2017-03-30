@@ -131,11 +131,11 @@ class Computer < Player
   
   def choose
     case name
-    when 'Chameleon' then self.move = Personality::chameleon(game1)
-    when 'Rock_Solid' then self.move = Personality::rock_solid(game1)
-    when 'Unbeatable' then self.move = Personality::unbeatable(game1)
+    when 'Chameleon' then self.move = Options::chameleon
+    when 'Rock_Solid' then self.move = Options::rock_solid
+    when 'Unbeatable' then self.move = Options::unbeatable
     else
-      self.move = Personality::random
+      self.move = Options::random
     end
   end
 end
@@ -297,24 +297,24 @@ end
 
 game1 = RPSGame.new
 
-class Personality < Computer
-  
-  def self.chameleon(game)
-    game.info[-2] || 
-    game.info[-1]
+class Options < Computer  
+  def self.chameleon(any_game)
+    any_game.info[-2] || any_game.info[-1]
   end
   
-  def self.rock_solid(game)
-    game.info[-1]
+  def self.rock_solid(any_game)
+    any_game.info[-1]
   end
   
   def self.random
     Move::VALUES.sample
   end
   
-  def self.unbeatable(game)
-    game.find_enemy(game.info.last)
+  def self.unbeatable(any_game)
+    any_game.find_enemy(from_game.info.last)
   end
 end
 
+game_info = Options.new(game1)
+p game_info
 game1.play
