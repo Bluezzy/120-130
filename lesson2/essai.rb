@@ -1,23 +1,18 @@
-class Obj
+class AnyClass
+  attr_accessor :number
   
-  def initialize(name)
-    @name = name
-  end
-  
-  def name
-    @name
-  end
-  
-  def name=(name)
-    @name = name
-  end
-  
-end
-
-a = Obj.new
-
-class Nal
-  def self.wala
-    a
+  def initialize(number)
+    @number = number
   end
 end
+
+OBJECT = AnyClass.new(6)
+
+class AnotherClass
+  def self.class_method
+    p OBJECT.number + 4
+  end
+end
+
+AnotherClass.class_method # => 10
+
