@@ -1,3 +1,4 @@
+require 'pry'
 
 class Move
   attr_accessor :value
@@ -212,14 +213,18 @@ class Options
   end
 
   def find_enemy(move)
-    Move.appropriate(move).enemies.sample
+    if move.nil?
+      false
+    else
+      Move.appropriate(move).enemies.sample
+    end
   end
 
   def smart_choice
     favorite_choice_percentage = biggest_percentage(info)[1]
     if (info.size > 4) && (favorite_choice_percentage >= 66)
-      computer.move = find_enemy(repetitive_move)
-      return "there is a smart choice"
+      mv = find_enemy(repetitive_move)
+      return mv
     end
     false
   end
@@ -241,7 +246,7 @@ class Options
   end
 
   def smart
-    smart_choice || find_enemy(info[-2]) || Move::Values.sample
+    smart_choice || find_enemy(info[-2]) || Move::VALUES.sample
   end
 end
 
