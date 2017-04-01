@@ -1,4 +1,3 @@
-require 'pry'
 
 class Move
   attr_accessor :value
