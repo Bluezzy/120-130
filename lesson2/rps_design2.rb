@@ -11,89 +11,129 @@ class Move
     @value
   end
 
-  def greater_than?(other_move)
-    case @value
-    when 'rock' then Rock.targets.include?(other_move)
-    when 'lizard' then Lizard.targets.include?(other_move)
-    when 'spock' then Spock.targets.include?(other_move)
-    when 'paper' then Paper.targets.include?(other_move)
-    when 'scissors' then Scissors.targets.include?(other_move)
-    end
-  end
-
-  def weaker_than?(other_move)
-    case @value
-    when 'rock' then Rock.enemies.include?(other_move)
-    when 'lizard' then Lizard.enemies.include?(other_move)
-    when 'spock' then Spock.enemies.include?(other_move)
-    when 'paper' then Paper.enemies.include?(other_move)
-    when 'scissors' then Scissors.enemies.include?(other_move)
+  def self.appropriate(choice)
+    case choice
+    when 'rock' then Rock.new
+    when 'paper' then Paper.new
+    when 'scissors' then Scissors.new
+    when 'lizard' then Lizard.new
+    when 'spock' then Spock.new
     end
   end
 end
 
-class Rock
-  attr_accessor :enemies, :targets
+class Rock < Move
+  def initialize
+    super('rock')
+  end
 
-  def self.enemies
+  def enemies
     @enemies = ['paper', 'spock']
   end
 
-  def self.targets
+  def targets
     @targets = ['lizard', 'scissors']
+  end
+
+  def greater_than?(other_move)
+    targets.include?(other_move.value)
+  end
+
+  def weaker_than?(other_move)
+    enemies.include?(other_move.value)
   end
 end
 
-class Paper
-  attr_accessor :enemies, :targets
+class Paper < Move
+  def initialize
+    super('paper')
+  end
 
-  def self.enemies
+  def enemies
     @enemies = ['scissors', 'lizard']
   end
 
-  def self.targets
+  def targets
     @targets = ['rock', 'spock']
+  end
+
+  def greater_than?(other_move)
+    targets.include?(other_move.value)
+  end
+
+  def weaker_than?(other_move)
+    enemies.include?(other_move.value)
   end
 end
 
-class Scissors
-  attr_accessor :enemies, :targets
+class Scissors < Move
+  def initialize
+    super('scissors')
+  end
 
-  def self.enemies
+  def enemies
     @enemies = ['rock', 'spock']
   end
 
-  def self.targets
+  def targets
     @targets = ['lizard', 'paper']
+  end
+
+  def greater_than?(other_move)
+    targets.include?(other_move.value)
+  end
+
+  def weaker_than?(other_move)
+    enemies.include?(other_move.value)
   end
 end
 
-class Lizard
-  attr_accessor :enemies, :targets
+class Lizard < Move
+  def initialize
+    super('lizard')
+  end
 
-  def self.enemies
+  def enemies
     @enemies = ['rock', 'scissors']
   end
 
-  def self.targets
+  def targets
     @targets = ['paper', 'spock']
+  end
+
+  def greater_than?(other_move)
+    targets.include?(other_move.value)
+  end
+
+  def weaker_than?(other_move)
+    enemies.include?(other_move.value)
   end
 end
 
-class Spock
-  attr_accessor :enemies, :targets
+class Spock < Move
+  def initialize
+    super('spock')
+  end
 
-  def self.enemies
+  def enemies
     @enemies = ['paper', 'rock']
   end
 
-  def self.targets
+  def targets
     @targets = ['lizard', 'scissors']
+  end
+
+  def greater_than?(other_move)
+    targets.include?(other_move.value)
+  end
+
+  def weaker_than?(other_move)
+    enemies.include?(other_move.value)
   end
 end
 
 class Player < Move
-  attr_accessor :move, :name
+  attr_accessor :name, :move
 
   def initialize
     set_name
@@ -102,14 +142,15 @@ end
 
 class Human < Player
   def set_name
+    system 'clear'
     n = ""
     loop do
       puts "What's your name?"
       n = gets.chomp
-      break unless n.empty?
+      break unless n.strip.empty?
       puts "Sorry, must enter a value."
     end
-    self.name = n
+    self.name = n.strip
   end
 
   def choose
@@ -120,23 +161,23 @@ class Human < Player
       break if Move::VALUES.include?(choice)
       puts "Sorry, invalid choice."
     end
-    self.move = Move.new(choice)
+    self.move = Move.appropriate(choice)
   end
 end
 
 class Computer < Player
   def set_name
-    self.name = ['Chameleon', 'Rock_Solid', 'Mister_Random',
-                 'Unbeatable', 'Smart'].sample
+    self.name = ['Federer', 'Zuckerberg', 'Mister_Random',
+                 'Nadal', 'Chameleon'].sample
   end
 
   def choose
     case name
-    when 'Chameleon' then self.move = Options.chameleon
-    when 'Rock_Solid' then self.move = Options.rock_solid
-    when 'Unbeatable' then self.move = Options.unbeatable
-    else
-      self.move = Options.random
+    when 'Chameleon' then self.move = Move.appropriate(Options.chameleon)
+    when 'Nadal' then self.move = Move.appropriate(Options.unbeatable)
+    when 'Federer' then self.move = Move.appropriate(Options.ruthless)
+    when 'Mister_Random' then self.move = Move.appropriate(Options.random)
+    when 'Zuckerberg' then self.move = Move.appropriate(Options.smart)
     end
   end
 end
@@ -158,7 +199,10 @@ class RPSGame
   end
 
   def display_welcome_message
+    system 'clear'
     puts "Welcome to Rock, Paper, Scissors, Lizard and Spock!"
+    puts "You're playing against : #{computer.name}."
+    puts ""
   end
 
   def display_goodbye_message
@@ -210,13 +254,7 @@ class RPSGame
   end
 
   def find_enemy(move)
-    case move
-    when 'rock' then Rock.enemies.sample
-    when 'scissors' then Scissors.enemies.sample
-    when 'paper' then Paper.enemies.sample
-    when 'lizard' then Lizard.enemies.sample
-    when 'spock' then Spock.enemies.sample
-    end
+    move.enemies.sample
   end
 
   def smart_choice
@@ -238,7 +276,7 @@ class RPSGame
       break if ['y', 'n'].include?(answer.downcase)
       puts "Sorry, must be y or n."
     end
-
+    system 'clear'
     return true if answer == "y"
     false
   end
@@ -248,6 +286,7 @@ class RPSGame
   end
 
   def display_overall_winner
+    system 'clear'
     if @computer_score > @human_score
       puts "It looks like #{computer.name} was the luckiest."
     elsif @human_score > @computer_score
@@ -262,7 +301,7 @@ class RPSGame
     @move_history[human.name].each_with_index do |move, idx|
       puts "#{idx + 1}. #{move}"
     end
-    puts "Moves history for #{computer.name} :"
+    puts "\nMoves history for #{computer.name} :"
     @move_history[computer.name].each_with_index do |move, idx|
       puts "#{idx + 1}. #{move}"
     end
@@ -277,6 +316,7 @@ class RPSGame
       answer = gets.chomp
     end
     return if answer == "n"
+    system 'clear'
     move_history_format
   end
 
@@ -286,13 +326,21 @@ class RPSGame
     display_goodbye_message
   end
 
-  def initial_choices
+  def human_choice
     human_info = @move_history[human.name]
-    computer_info = @move_history[computer.name]
     human.choose
     human_info << human.move.value
-    smart_choice || computer.choose
-    computer_info << computer.move
+  end
+
+  def computer_choice
+    computer_info = @move_history[computer.name]
+    computer.choose
+    computer_info << computer.move.value
+  end
+
+  def initial_choices
+    human_choice
+    computer_choice
   end
 
   def display_info
@@ -324,7 +372,7 @@ class Options < Computer
     GAME.info[-2] || GAME.info[-1]
   end
 
-  def self.rock_solid
+  def self.unbeatable
     GAME.info[-1]
   end
 
@@ -332,8 +380,12 @@ class Options < Computer
     Move::VALUES.sample
   end
 
-  def self.unbeatable
+  def self.ruthless
     GAME.find_enemy(GAME.info.last)
+  end
+
+  def self.smart
+    GAME.smart_choice || Move::VALUES.sample
   end
 end
 
