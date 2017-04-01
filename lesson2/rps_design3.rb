@@ -1,4 +1,3 @@
-require 'pry'
 
 class Move
   attr_accessor :value
@@ -183,13 +182,13 @@ class Computer < Player
   end
 end
 
-class Options 
+class Options
   attr_reader :info
 
   def initialize(info)
     @info = info
   end
-  
+
   def biggest_percentage(move_history_hash)
     percentages = { 'rock' => 0.0,
                     'paper' => 0.0,
@@ -224,7 +223,7 @@ class Options
     end
     false
   end
-  
+
   def chameleon
     info[-2] || info[-1]
   end
@@ -250,7 +249,7 @@ end
 class RPSGame
   attr_accessor :human, :computer, :human_score, :computer_score, :move_history,
                 :info, :strategy
-  
+
   def initialize
     @human = Human.new
     @computer = Computer.new
@@ -258,9 +257,9 @@ class RPSGame
     @computer_score = 0
     @move_history = { human.name => [], computer.name => [] }
     @info = @move_history[human.name]
-    @strategy = Options.new(@info)    
+    @strategy = Options.new(@info)
   end
-  
+
   def info
     @move_history[human.name]
   end
