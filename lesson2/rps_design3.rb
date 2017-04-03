@@ -1,3 +1,4 @@
+require 'pry'
 
 class Move
   attr_accessor :value
@@ -20,6 +21,14 @@ class Move
     when 'spock' then Spock.new
     end
   end
+
+  def greater_than?(other_move)
+    targets.include?(other_move.value)
+  end
+
+  def weaker_than?(other_move)
+    enemies.include?(other_move.value)
+  end
 end
 
 class Rock < Move
@@ -28,19 +37,11 @@ class Rock < Move
   end
 
   def enemies
-    @enemies = ['paper', 'spock']
+    ['paper', 'spock']
   end
 
   def targets
-    @targets = ['lizard', 'scissors']
-  end
-
-  def greater_than?(other_move)
-    targets.include?(other_move.value)
-  end
-
-  def weaker_than?(other_move)
-    enemies.include?(other_move.value)
+    ['lizard', 'scissors']
   end
 end
 
@@ -56,14 +57,6 @@ class Paper < Move
   def targets
     @targets = ['rock', 'spock']
   end
-
-  def greater_than?(other_move)
-    targets.include?(other_move.value)
-  end
-
-  def weaker_than?(other_move)
-    enemies.include?(other_move.value)
-  end
 end
 
 class Scissors < Move
@@ -77,14 +70,6 @@ class Scissors < Move
 
   def targets
     @targets = ['lizard', 'paper']
-  end
-
-  def greater_than?(other_move)
-    targets.include?(other_move.value)
-  end
-
-  def weaker_than?(other_move)
-    enemies.include?(other_move.value)
   end
 end
 
@@ -100,14 +85,6 @@ class Lizard < Move
   def targets
     @targets = ['paper', 'spock']
   end
-
-  def greater_than?(other_move)
-    targets.include?(other_move.value)
-  end
-
-  def weaker_than?(other_move)
-    enemies.include?(other_move.value)
-  end
 end
 
 class Spock < Move
@@ -122,17 +99,9 @@ class Spock < Move
   def targets
     @targets = ['lizard', 'scissors']
   end
-
-  def greater_than?(other_move)
-    targets.include?(other_move.value)
-  end
-
-  def weaker_than?(other_move)
-    enemies.include?(other_move.value)
-  end
 end
 
-class Player < Move
+class Player
   attr_accessor :name, :move
 
   def initialize
@@ -182,7 +151,7 @@ class Computer < Player
   end
 end
 
-class Options
+class Strategies
   attr_reader :info
 
   def initialize(info)
@@ -221,7 +190,7 @@ class Options
 
   def smart_choice
     favorite_choice_percentage = biggest_percentage(info)[1]
-    if (info.size > 4) && (favorite_choice_percentage >= 66)
+    if (info.size > 4) && (favorite_choice_percentage >= 50)
       mv = find_enemy(repetitive_move)
       return mv
     end
@@ -251,8 +220,7 @@ end
 
 # Game Orchestration Engine
 class RPSGame
-  attr_accessor :human, :computer, :human_score, :computer_score, :move_history,
-                :info, :strategy
+  attr_accessor :human, :computer, :strategy
 
   def initialize
     @human = Human.new
@@ -260,12 +228,9 @@ class RPSGame
     @human_score = 0
     @computer_score = 0
     @move_history = { human.name => [], computer.name => [] }
-    @info = @move_history[human.name]
-    @strategy = Options.new(@info)
-  end
-
-  def info
-    @move_history[human.name]
+    @human_info = @move_history[human.name]
+    @comp_info = @move_history[computer.name]
+    @strategy = Strategies.new(@human_info)
   end
 
   def display_welcome_message
@@ -273,6 +238,23 @@ class RPSGame
     puts "Welcome to Rock, Paper, Scissors, Lizard and Spock!"
     puts "You're playing against : #{computer.name}."
     puts ""
+  end
+
+  def score_at(move_index)
+    score1 = 0
+    score2 = 0
+    0.upto(move_index) do |idx|
+      if result(Move.appropriate(@human_info[idx]),
+                Move.appropriate(@comp_info[idx])) == :won
+        score1 += 1
+      elsif result(Move.appropriate(@human_info[idx]),
+                   Move.appropriate(@comp_info[idx])) == :lost
+        score2 += 1
+      end
+      idx += 1
+      break if idx >= @human_info.size
+    end
+    "#{score1}-#{score2}"
   end
 
   def display_goodbye_message
@@ -284,21 +266,42 @@ class RPSGame
     puts "#{computer.name} chose #{computer.move}."
   end
 
-  def display_winner
-    if human.move.greater_than?(computer.move)
-      @human_score += 1
-      puts "#{human.name} won!"
-    elsif human.move.weaker_than?(computer.move)
-      @computer_score += 1
-      puts "#{computer.name} won!"
+  def result(first_move, second_move)
+    if first_move.greater_than?(second_move)
+      :won
+    elsif first_move.weaker_than?(second_move)
+      :lost
     else
-      puts "It's a tie!"
+      :tie
     end
+  end
+
+  def update_score
+    @human_score += 1 if human_won
+    @computer_score += 1 if computer_won
+  end
+
+  def human_won
+    result(human.move, computer.move) == :won
+  end
+
+  def computer_won
+    result(human.move, computer.move) == :lost
+  end
+
+  def tie
+    result(human.move, computer.move) == :tie
+  end
+
+  def display_winner
+    puts "It's a tie" if tie
+    puts "#{human.name} won!" if human_won
+    puts "#{computer.name} won!" if computer_won
   end
 
   def display_score
     puts "#{human.name} has #{@human_score}."
-    puts "#{computer.name} has #{@computer_score}"
+    puts "#{computer.name} has #{@computer_score}."
   end
 
   def play_again?
@@ -310,8 +313,7 @@ class RPSGame
       puts "Sorry, must be y or n."
     end
     system 'clear'
-    return true if answer == "y"
-    false
+    answer == 'y'
   end
 
   def display_overall_winner
@@ -325,18 +327,28 @@ class RPSGame
     end
   end
 
-  def move_history_format
-    puts "Moves history for #{human.name} :"
-    @move_history[human.name].each_with_index do |move, idx|
-      puts "#{idx + 1}. #{move}"
-    end
-    puts "\nMoves history for #{computer.name} :"
-    @move_history[computer.name].each_with_index do |move, idx|
-      puts "#{idx + 1}. #{move}"
+  def display_move_history(player_info, opponent_info)
+    idx = 0
+    loop do
+      puts "#{idx + 1}. #{player_info[idx]}"\
+           " (#{result(Move.appropriate(player_info[idx]),
+                       Move.appropriate(opponent_info[idx]))}"\
+           " against #{opponent_info[idx]})"
+      puts "   #{score_at(idx)}"
+      idx += 1
+      break if idx >= player_info.size
     end
   end
 
-  def display_moves_history?
+  def display_all_moves_history
+    system 'clear'
+    puts "Moves history for #{human.name} :"
+    display_move_history(@human_info, @comp_info)
+    puts "\nMoves history for #{computer.name} :"
+    display_move_history(@comp_info, @human_info)
+  end
+
+  def display_move_history?
     puts "\n\nWould you like to display the moves history?(y/n)"
     answer = gets.chomp
     loop do
@@ -344,14 +356,12 @@ class RPSGame
       puts "sorry, the input is wrong.(y/n)"
       answer = gets.chomp
     end
-    return if answer == "n"
-    system 'clear'
-    move_history_format
+    answer == 'y'
   end
 
   def final_display
     display_overall_winner
-    display_moves_history?
+    display_all_moves_history if display_move_history?
     display_goodbye_message
   end
 
@@ -375,6 +385,7 @@ class RPSGame
   def display_info
     system 'clear'
     display_moves
+    update_score
     display_winner
     display_score
   end
