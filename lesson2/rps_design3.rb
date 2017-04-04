@@ -93,11 +93,11 @@ class Spock < Move
   end
 
   def enemies
-    @enemies = ['paper', 'rock']
+    @enemies = ['paper', 'lizard']
   end
 
   def targets
-    @targets = ['lizard', 'scissors']
+    @targets = ['rock', 'scissors']
   end
 end
 
@@ -407,3 +407,4 @@ end
 
 game = RPSGame.new
 game.play
+

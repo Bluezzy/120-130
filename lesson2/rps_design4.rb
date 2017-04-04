@@ -381,7 +381,7 @@ class RPSGame
 
   def final_display
     display_overall_winner
-    move_history.display_all if display_move_history?
+    move_history.display if display_move_history?
     display_goodbye_message
   end
 
