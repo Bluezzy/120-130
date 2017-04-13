@@ -45,3 +45,48 @@ object = InvoiceEntry.new("Book", 3)
 puts object.inspect
 object.get_seven
 puts object.inspect
+
+class Greeting
+  def greet(message)
+    puts message
+  end
+end
+
+class Hello < Greeting
+  def hi
+    greet("hello")
+  end
+end
+
+class GoodBye < Greeting
+  def bye
+    greet("bye")
+  end
+end
+
+class KrispyKreme
+  def initialize(filling_type, glazing)
+    @filling_type = filling_type
+    @glazing = glazing
+  end
+  
+  def to_s
+    filling_string = @filling_type ? @filling_type : "Plain"
+    glazing_string = @glazing ? " with #{@glazing}" : ''
+    filling_string + glazing_string
+  end
+end
+
+class Light
+  attr_accessor :brightness, :color
+
+  def initialize(brightness, color)
+    @brightness = brightness
+    @color = color
+  end
+
+  def self.information
+    "I want to turn on the light with a brightness level of super high and a colour of green"
+  end
+
+end
