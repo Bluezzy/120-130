@@ -1,6 +1,6 @@
 module Moveable
   attr_accessor :speed, :heading, :fuel_capacity, :fuel_efficiency
-  
+
   def range
     @fuel_capacity * @fuel_efficiency
   end
@@ -26,7 +26,7 @@ class WheeledVehicle
   end
 end
 
-class Auto < WheeledVehicle  
+class Auto < WheeledVehicle
   def initialize
     # 4 tires are various tire pressures
     super([30,30,32,32], 50, 25.0)
@@ -42,7 +42,7 @@ end
 
 class Catamaran
   include Moveable
-  
+
   attr_accessor :propeller_count, :hull_count, :speed, :heading
 
   def initialize(num_propellers, num_hulls, km_traveled_per_liter, liters_of_fuel_capacity)
@@ -51,7 +51,7 @@ class Catamaran
 end
 
 class Motorboat < Catamaran
-  
+
   def initialize(km_traveled_per_liter, liters_of_fuel_capacity)
     @num_propellers = 1
     @num_hulls = 1
