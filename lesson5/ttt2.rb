@@ -1,17 +1,17 @@
 module Strategy
-  def strategy(brd, any_marker)
-    smart_choice(brd, any_marker)
+  def strategy(any_marker)
+    smart_choice(any_marker)
   end
 
-  def smart_choice(brd, any_marker)
-    winning_choice(brd, any_marker) || defensive_choice(brd, any_marker) ||
-      center_square_move(brd) || random_move(brd)
+  def smart_choice(any_marker)
+    winning_choice(any_marker) || defensive_choice(any_marker) ||
+      center_square_move || random_move
   end
 
-  def best_square(brd, any_marker)
+  def best_square(any_marker)
     Board::WINNING_LINES.each do |line|
       board_line = {}
-      line.each { |key| board_line[key] = brd.squares[key].marker }
+      line.each { |key| board_line[key] = self.squares[key].marker }
       if board_line.values.count(any_marker) == 2 &&
          board_line.values.count(Square::INITIAL_MARKER) == 1
         return board_line.key(Square::INITIAL_MARKER)
@@ -20,16 +20,16 @@ module Strategy
     false
   end
 
-  def random_move(brd)
-    brd.unmarked_keys.sample
+  def random_move
+    self.unmarked_keys.sample
   end
 
-  def winning_choice(brd, any_marker)
-    best_square(brd, any_marker)
+  def winning_choice(any_marker)
+    best_square(any_marker)
   end
 
-  def defensive_choice(brd, any_marker)
-    best_square(brd, opposite_marker(any_marker))
+  def defensive_choice(any_marker)
+    best_square(opposite_marker(any_marker))
   end
 
   def opposite_marker(any_marker)
@@ -40,12 +40,13 @@ module Strategy
     end
   end
 
-  def center_square_move(brd)
-    5 if brd.unmarked_keys.include?(5)
+  def center_square_move
+    5 if self.unmarked_keys.include?(5)
   end
 end
 
 class Board
+  include Strategy
   attr_accessor :squares
   WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] + # rows
                   [[1, 4, 7], [2, 5, 8], [3, 6, 9]] + # cols
@@ -289,7 +290,6 @@ class TTTGame
     @human_score = 0
     @computer_score = 0
     @first_to_start = false
-    @strategy = @computer.strategy(@board, @computer.marker)
   end
 
   def play
@@ -361,7 +361,7 @@ class TTTGame
   end
 
   def computer_moves
-    square = computer.strategy(board, computer.marker)
+    square = board.strategy(computer.marker)
     board[square] = computer.marker
   end
 
