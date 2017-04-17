@@ -235,10 +235,6 @@ class Game
     @game_over = false
   end
 
-  def hit(deck, state = :revealed)
-    hand << Card.new(deck, state)
-  end
-
   def play
     clear
     introduction_message
