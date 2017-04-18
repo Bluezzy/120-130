@@ -2,10 +2,16 @@ require 'pry'
 
 module Screen
   def clear
-    system 'clear'
+    system('clear') || system('cls')
+  end
+
+  def display_good_bye_message
+    clear
+    puts "\n\n==> Thanks for playing Twenty-One. Good bye!"
   end
 
   def dealer_stays_and_display_hands
+    clear
     puts "\ndealer decided to stay..."
     display_hands
     dealer.display_hand_total
@@ -19,12 +25,11 @@ module Screen
     puts ""
   end
 
-  def dealer_busted_display_and_game_over
+  def dealer_busted_display
     clear
     dealer.display_last_player_card
     puts "dealer busted! (#{dealer.hand.total})"
     puts ""
-    self.game_over = true
   end
 
   def display_last_player_card
@@ -96,68 +101,39 @@ module Screen
 end
 
 class Hand
-  attr_accessor :cards, :values, :total
+  attr_accessor :cards, :total
   def initialize
     @cards = []
-    @values = []
     @total = 0
   end
 
   def check(card)
-    value = value(card)
-    values << value
-    update_total
+    self.total += card.value
+    adjust_total if self.total > 21
   end
 
-  def total_without_ace_correct
-    count = 0
-    values.each { |value| count += value }
-    count
-  end
-
-  def ace_correct
-    return unless total_without_ace_correct > 21
-    values.map! do |value|
-      if value == 11
-        1
-      else
-        value
+  def adjust_total
+    return unless cards.any?{|card| card.type == 'A' && card.value == 11 }
+    cards.each do |card|
+      if card.value == 11
+        card.value = 1
+        self.total -= 10
+        break
       end
     end
-  end
-
-  def update_total
-    ace_correct
-    self.total = values.reduce(:+)
-  end
-
-  def value(card)
-    if ('2'..'10').to_a.include?(card.type)
-      card.type.to_i
-    elsif Card.figures.include?(card.type)
-      10
-    else
-      ace_value
-    end
-  end
-
-  def ace_value
-    if total >= 11
-      1
-    else
-      11
-    end
+    binding.pry
   end
 end
 
 class Card
-  attr_reader :name, :color, :type
+  attr_reader :color, :type
   attr_accessor :state, :value
   def initialize(deck, state = :revealed)
-    @name = deck.pop
-    @type = @name[0]
-    @color = @name[1]
+    name = deck.pop
+    @type = name[0]
+    @color = name[1]
     @state = state
+    @value = value
   end
 
   def to_s
@@ -165,6 +141,16 @@ class Card
       "#{type} of #{color}"
     else
       "???(hidden card)"
+    end
+  end
+
+  def value
+    if ('2'..'10').to_a.include?(type)
+      type.to_i
+    elsif Card.figures.include?(type)
+      10
+    else
+      11
     end
   end
 
@@ -186,8 +172,8 @@ class Participant
 
   def hit(deck, state = :revealed)
     new_card = Card.new(deck, state)
-    hand.check(new_card) # deal with aces values according to hand
     hand.cards << new_card
+    hand.check(new_card) # deal with aces values according to hand
   end
 
   def busted?
@@ -224,8 +210,7 @@ class Game
   HIT_OR_STAY = HIT + STAY
   include Screen
   include Deck
-  attr_reader :deck, :player, :dealer
-  attr_accessor :switch_turn, :game_over
+  attr_accessor :switch_turn, :game_over, :deck, :player, :dealer, :first_time
 
   def initialize
     @deck = create_deck
@@ -233,12 +218,34 @@ class Game
     @dealer = Participant.new(:dealer)
     @switch_turn = false
     @game_over = false
+    @first_time = true
   end
 
   def play
-    clear
-    introduction_message
-    start
+    loop do
+      reset?
+      clear
+      introduction_message
+      start
+      break unless play_again?
+    end
+    display_good_bye_message
+  end
+
+  def reset?
+    return unless first_time == false
+    initialize
+  end
+
+  def play_again?
+    puts "\nWould you like to play again?('y'/'n')"
+    answer = gets.chomp.strip
+    loop do
+      break if %w(y yes n no).include?(answer.downcase)
+      puts "Wrong input('y'/'n')"
+      answer = gets.chomp.strip
+    end
+    %w(y yes).include?(answer.downcase)
   end
 
   def start
@@ -248,6 +255,7 @@ class Game
     player_turn
     dealer_turn
     show_result
+    self.first_time = false
   end
 
   def deal_cards
@@ -330,7 +338,8 @@ class Game
     display_dealer_hidden_card_and_hands
     dealer_hitting_and_thinking_process
     if dealer.busted?
-      dealer_busted_display_and_game_over
+      dealer_busted_display
+      self.game_over = true
       return
     end
     dealer_stays_and_display_hands
