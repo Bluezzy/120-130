@@ -270,7 +270,7 @@ class Game
     player.display_last_player_card
   end
 
-  def hit_or_stay?
+  def ask_hit_or_stay
     puts "\nWould you like to hit or stay ? ('h' for hit / 's' for stay)"
     answer = nil
     loop do
@@ -282,7 +282,7 @@ class Game
   end
 
   def hit_or_stay
-    answer = hit_or_stay?
+    answer = ask_hit_or_stay
     if HIT.include?(answer.downcase.strip)
       player_hit_mechanism
     else
