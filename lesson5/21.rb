@@ -113,7 +113,7 @@ class Hand
   end
 
   def adjust_total
-    return unless cards.any?{|card| card.type == 'A' && card.value == 11 }
+    return unless cards.any? { |card| card.type == 'A' && card.value == 11 }
     cards.each do |card|
       if card.value == 11
         card.value = 1
@@ -121,7 +121,6 @@ class Hand
         break
       end
     end
-    binding.pry
   end
 end
 
@@ -133,18 +132,10 @@ class Card
     @type = name[0]
     @color = name[1]
     @state = state
-    @value = value
+    @value = determine_value
   end
 
-  def to_s
-    if state == :revealed
-      "#{type} of #{color}"
-    else
-      "???(hidden card)"
-    end
-  end
-
-  def value
+  def determine_value
     if ('2'..'10').to_a.include?(type)
       type.to_i
     elsif Card.figures.include?(type)
@@ -156,6 +147,14 @@ class Card
 
   def self.figures
     ['J', 'Q', 'K']
+  end
+
+  def to_s
+    if state == :revealed
+      "#{type} of #{color}"
+    else
+      "???(hidden card)"
+    end
   end
 end
 
@@ -241,11 +240,11 @@ class Game
     puts "\nWould you like to play again?('y'/'n')"
     answer = gets.chomp.strip
     loop do
-      break if %w(y yes n no).include?(answer.downcase)
+      break if ['y', 'yes', 'n', 'no'].include?(answer.downcase)
       puts "Wrong input('y'/'n')"
       answer = gets.chomp.strip
     end
-    %w(y yes).include?(answer.downcase)
+    ['y', 'yes'].include?(answer.downcase)
   end
 
   def start
@@ -279,6 +278,11 @@ class Game
       break if HIT_OR_STAY.include?(answer.downcase.strip)
       puts "Sorry, wrong input(h/s)"
     end
+    answer
+  end
+
+  def hit_or_stay
+    answer = hit_or_stay?
     if HIT.include?(answer.downcase.strip)
       player_hit_mechanism
     else
@@ -288,7 +292,7 @@ class Game
 
   def player_turn
     loop do
-      hit_or_stay?
+      hit_or_stay
       break if player.busted? || switch_turn
       display_hands
     end
