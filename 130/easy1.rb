@@ -81,10 +81,48 @@ def capitalize_all(string)
   string.split(' ').map!(&:capitalize).join(' ')
 end
 
-puts rot13_opposite_name('obiwan kenobi')
-
 result = encrypted_names.map do |name|
   capitalize_all(rot13_opposite_name(name))
 end
 
-puts result
+# puts result
+
+def any?(collection)
+  collection.each do |el|
+    if yield(el) == true
+      return true
+    end
+  end
+  false
+end
+
+def all?(collection)
+  collection.each do |element|
+    return false unless yield(element)
+  end
+  true
+end
+
+def none?(collection)
+  collection.each do |element|
+    return false if yield(element)
+  end
+  true
+end
+
+def one?(collection)
+  booleans = []
+  collection.each do |element|
+    booleans << yield(element)
+  end
+  return false unless booleans.count(true) == 1
+  true
+end
+
+def count(collection)
+  nb_of_validated_elements = 0
+  collection.each do |element|
+    nb_of_validated_elements += 1 if yield(element)
+  end
+  nb_of_validated_elements
+end
