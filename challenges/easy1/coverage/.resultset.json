@@ -1,0 +1,40 @@
+{
+  "MiniTest": {
+    "coverage": {
+      "/home/ubuntu/workspace/challenges/easy1/octal.rb": [
+        1,
+        1,
+        null,
+        1,
+        15,
+        15,
+        null,
+        null,
+        1,
+        51,
+        null,
+        null,
+        1,
+        15,
+        9,
+        9,
+        9,
+        9,
+        9,
+        28,
+        28,
+        28,
+        null,
+        9,
+        null,
+        null,
+        null,
+        1,
+        1,
+        null,
+        null
+      ]
+    },
+    "timestamp": 1495557872
+  }
+}
